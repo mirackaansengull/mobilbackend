@@ -46,7 +46,7 @@ func main() {
 	log.Println("BAŞARILI: Veritabanı bağlantısı hazır.")
 
 	//Endpointler
-	http.HandleFunc("/api/register", RegisterHandler)
+	http.HandleFunc("POST /register", RegisterHandler)
 
 	// Sunucuyu Başlat
 	log.Println("Sunucu 8080 portunda çalışıyor...")

@@ -12,11 +12,6 @@ import (
 
 // Handler Fonksiyonu
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	// Sadece POST isteği
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 
 	// JSON çözümleme
 	var req RegisterRequest
