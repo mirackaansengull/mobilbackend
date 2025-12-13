@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -111,56 +110,63 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ---------------------------------------------------------
-// YARDIMCI FONKSİYON: Brevo API İsteği
-// ---------------------------------------------------------
-func sendEmailWithBrevo(toEmail, resetLink string) error {
-	apiKey := os.Getenv("BREVO_API_KEY") // API Key'i buradan alıyoruz
-	if apiKey == "" {
-		return fmt.Errorf("BREVO_API_KEY ortam değişkeni bulunamadı")
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	// 1. İsteği Oku
+	var req LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Geçersiz JSON", http.StatusBadRequest)
+		return
 	}
 
-	// HTML Mail İçeriği
-	htmlBody := fmt.Sprintf(`
-		<h1>Şifre Sıfırlama Talebi</h1>
-		<p>Hesabınızın şifresini sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
-		<p><a href="%s">Şifremi Sıfırla</a></p>
-		<p>Bu işlemi siz yapmadıysanız, bu maili görmezden gelebilirsiniz.</p>
-	`, resetLink)
-
-	// JSON Verisini Hazırla
-	emailReq := BrevoEmailRequest{
-		Sender:      BrevoUser{Name: "Kampüs Güvenlik", Email: "mobilprogramlama123@gmail.com"}, // Buraya kendi onaylı mailini yazarsan daha iyi olur
-		To:          []BrevoUser{{Email: toEmail}},
-		Subject:     "Şifre Sıfırlama İşlemi",
-		HtmlContent: htmlBody,
+	// 2. Firebase REST API'ye İstek At (Simülasyon)
+	// NOT: Bu "API_KEY"i environment variable'dan almak daha güvenlidir.
+	// Şimdilik test için buraya string olarak yapıştırabilirsin ya da os.Getenv kullanabilirsin.
+	webAPIKey := os.Getenv("FIREBASE_WEB_API_KEY")
+	if webAPIKey == "" {
+		// Hata almamak için şimdilik hardcoded yazabilirsin ama production'da yapma:
+		// webAPIKey = "BURAYA_FIREBASE_CONSOLE_DAN_ALDIGIN_KEYI_YAZ"
+		http.Error(w, "API Key eksik", http.StatusInternalServerError)
+		return
 	}
 
-	payload, _ := json.Marshal(emailReq)
+	url := "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + webAPIKey
 
-	// HTTP POST İsteği Oluştur
-	req, err := http.NewRequest("POST", "https://api.brevo.com/v3/smtp/email", bytes.NewBuffer(payload))
-	if err != nil {
-		return err
-	}
-
-	// Header Ayarları
-	req.Header.Set("accept", "application/json")
-	req.Header.Set("api-key", apiKey)
-	req.Header.Set("content-type", "application/json")
+	// Google'a gidecek veri
+	requestBody, _ := json.Marshal(map[string]interface{}{
+		"email":             req.Email,
+		"password":          req.Password,
+		"returnSecureToken": true,
+	})
 
 	// İsteği Gönder
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
-		return err
+		http.Error(w, "Google API hatası", http.StatusInternalServerError)
+		return
 	}
 	defer resp.Body.Close()
 
-	// 200 veya 201 dönmezse hata var demektir
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return fmt.Errorf("brevo api hatası: status code %d", resp.StatusCode)
+	// 3. Cevabı Kontrol Et
+	if resp.StatusCode != http.StatusOK {
+		// Şifre yanlışsa buraya düşer
+		http.Error(w, "Giriş başarısız! E-posta veya şifre hatalı.", http.StatusUnauthorized)
+		return
 	}
 
-	return nil
+	// 4. Başarılıysa Token Bilgilerini Döndür
+	var loginResp LoginResponse
+	if err := json.NewDecoder(resp.Body).Decode(&loginResp); err != nil {
+		http.Error(w, "Cevap okunamadı", http.StatusInternalServerError)
+		return
+	}
+
+	// İPUCU: Burada ileride kullanıcının ROLÜNÜ de (admin/user) veritabanından çekip dönebiliriz.
+	// Proje isterlerinde "Başarılı giriş sonrası rol otomatik atanır" diyor[cite: 27].
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Giriş başarılı",
+		"uid":     loginResp.LocalId,
+		"token":   loginResp.IdToken, // Bu token ile ileride güvenli işlem yapılacak
+	})
 }

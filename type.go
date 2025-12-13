@@ -33,3 +33,17 @@ type BrevoUser struct {
 	Name  string `json:"name,omitempty"`
 	Email string `json:"email"`
 }
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// Google'dan Dönen Cevap Yapısı
+type LoginResponse struct {
+	IdToken      string `json:"idToken"` // Mobil uygulamada kullanacağımız token
+	Email        string `json:"email"`
+	RefreshToken string `json:"refreshToken"`
+	ExpiresIn    string `json:"expiresIn"`
+	LocalId      string `json:"localId"` // User ID (UID)
+}
