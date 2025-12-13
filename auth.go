@@ -130,7 +130,7 @@ func sendEmailWithBrevo(toEmail, resetLink string) error {
 
 	// JSON Verisini Hazırla
 	emailReq := BrevoEmailRequest{
-		Sender:      BrevoUser{Name: "Kampüs Güvenlik", Email: "no-reply@kampusguvenlik.com"}, // Buraya kendi onaylı mailini yazarsan daha iyi olur
+		Sender:      BrevoUser{Name: "Kampüs Güvenlik", Email: "mobilprogramlama123@gmail.com"}, // Buraya kendi onaylı mailini yazarsan daha iyi olur
 		To:          []BrevoUser{{Email: toEmail}},
 		Subject:     "Şifre Sıfırlama İşlemi",
 		HtmlContent: htmlBody,
