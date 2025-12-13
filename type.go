@@ -9,7 +9,6 @@ type RegisterRequest struct {
 	Department string `json:"department"` // Birim bilgisi
 }
 
-// Veritabanına kaydedilecek veri yapısı
 type User struct {
 	ID         string    `firestore:"id"`
 	Email      string    `firestore:"email"`
@@ -17,4 +16,20 @@ type User struct {
 	Department string    `firestore:"department"`
 	Role       string    `firestore:"role"` // Varsayılan: user
 	CreatedAt  time.Time `firestore:"created_at"`
+}
+
+type ForgotPasswordRequest struct {
+	Email string `json:"email"`
+}
+
+type BrevoEmailRequest struct {
+	Sender      BrevoUser   `json:"sender"`
+	To          []BrevoUser `json:"to"`
+	Subject     string      `json:"subject"`
+	HtmlContent string      `json:"htmlContent"`
+}
+
+type BrevoUser struct {
+	Name  string `json:"name,omitempty"`
+	Email string `json:"email"`
 }
