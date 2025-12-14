@@ -19,7 +19,6 @@ var AuthClient *auth.Client
 func main() {
 	ctx := context.Background()
 
-	// 1. Firebase Bağlantısı
 	credentialsPath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 	if credentialsPath == "" {
 		credentialsPath = "serviceAccountKey.json"
@@ -31,7 +30,6 @@ func main() {
 		log.Fatalf("HATA: Firebase başlatılamadı: %v", err)
 	}
 
-	// 2. Client'ları Başlat ve Global Değişkenlere Ata
 	FirestoreClient, err = app.Firestore(ctx)
 	if err != nil {
 		log.Fatalf("Firestore hatası: %v", err)
@@ -51,8 +49,8 @@ func main() {
 	http.HandleFunc("POST /login", LoginHandler)
 	http.HandleFunc("GET /profile", GetUserProfileHandler)
 	http.HandleFunc("PUT /update-profile", UpdateUserProfileHandler)
+	http.HandleFunc("POST /reports", CreateReportHandler)
 
-	// Sunucuyu Başlat
 	log.Println("Sunucu 8080 portunda çalışıyor...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

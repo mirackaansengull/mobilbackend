@@ -40,13 +40,12 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-// Google'dan Dönen Cevap Yapısı
 type LoginResponse struct {
-	IdToken      string `json:"idToken"` // Mobil uygulamada kullanacağımız token
+	IdToken      string `json:"idToken"`
 	Email        string `json:"email"`
 	RefreshToken string `json:"refreshToken"`
 	ExpiresIn    string `json:"expiresIn"`
-	LocalId      string `json:"localId"` // User ID (UID)
+	LocalId      string `json:"localId"`
 }
 
 type ProfileResponse struct {
@@ -58,5 +57,31 @@ type ProfileResponse struct {
 
 type UpdateProfileRequest struct {
 	Department        string   `json:"department"`
-	NotificationPrefs []string `json:"notification_prefs"` // Örn: ["Sağlık", "Güvenlik"]
+	NotificationPrefs []string `json:"notification_prefs"`
+}
+
+type CreateReportRequest struct {
+	UserID      string  `json:"user_id"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Type        string  `json:"type"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+}
+
+type Report struct {
+	ID          string    `firestore:"id"`
+	UserID      string    `firestore:"user_id"`
+	Title       string    `firestore:"title"`
+	Description string    `firestore:"description"`
+	Type        string    `firestore:"type"`
+	Status      string    `firestore:"status"`
+	Location    GeoPoint  `firestore:"location"`
+	CreatedAt   time.Time `firestore:"created_at"`
+	UpdatedAt   time.Time `firestore:"updated_at"`
+}
+
+type GeoPoint struct {
+	Lat float64 `firestore:"lat"`
+	Lng float64 `firestore:"lng"`
 }
