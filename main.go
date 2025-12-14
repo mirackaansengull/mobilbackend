@@ -50,6 +50,7 @@ func main() {
 	http.HandleFunc("GET /profile", GetUserProfileHandler)
 	http.HandleFunc("PUT /update-profile", UpdateUserProfileHandler)
 	http.HandleFunc("POST /reports", CreateReportHandler)
+	http.HandleFunc("GET /get-reports", GetReportsHandler)
 
 	log.Println("Sunucu 8080 portunda çalışıyor...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
