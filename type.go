@@ -6,16 +6,17 @@ type RegisterRequest struct {
 	Email      string `json:"email"`
 	Password   string `json:"password"`
 	FullName   string `json:"full_name"`
-	Department string `json:"department"` // Birim bilgisi
+	Department string `json:"department"`
 }
 
 type User struct {
-	ID         string    `firestore:"id"`
-	Email      string    `firestore:"email"`
-	FullName   string    `firestore:"full_name"`
-	Department string    `firestore:"department"`
-	Role       string    `firestore:"role"` // Varsayılan: user
-	CreatedAt  time.Time `firestore:"created_at"`
+	ID                string    `firestore:"id"`
+	Email             string    `firestore:"email"`
+	FullName          string    `firestore:"full_name"`
+	Department        string    `firestore:"department"`
+	Role              string    `firestore:"role"`
+	NotificationPrefs []string  `firestore:"notification_prefs"`
+	CreatedAt         time.Time `firestore:"created_at"`
 }
 
 type ForgotPasswordRequest struct {
@@ -53,4 +54,9 @@ type ProfileResponse struct {
 	Email      string `json:"email"`
 	Department string `json:"department"`
 	Role       string `json:"role"`
+}
+
+type UpdateProfileRequest struct {
+	Department        string   `json:"department"`
+	NotificationPrefs []string `json:"notification_prefs"` // Örn: ["Sağlık", "Güvenlik"]
 }
