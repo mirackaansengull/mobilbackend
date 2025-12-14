@@ -49,6 +49,7 @@ func main() {
 	http.HandleFunc("POST /register", RegisterHandler)
 	http.HandleFunc("POST /forgot-password", ForgotPasswordHandler)
 	http.HandleFunc("POST /login", LoginHandler)
+	http.HandleFunc("GET /profile", GetUserProfileHandler)
 
 	// Sunucuyu Başlat
 	log.Println("Sunucu 8080 portunda çalışıyor...")

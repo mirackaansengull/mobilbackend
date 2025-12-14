@@ -9,7 +9,7 @@ import (
 )
 
 func sendEmailWithBrevo(toEmail, resetLink string) error {
-	apiKey := os.Getenv("BREVO_API_KEY") // API Key'i buradan alıyoruz
+	apiKey := os.Getenv("BREVO_API_KEY")
 	if apiKey == "" {
 		return fmt.Errorf("BREVO_API_KEY ortam değişkeni bulunamadı")
 	}
@@ -24,7 +24,7 @@ func sendEmailWithBrevo(toEmail, resetLink string) error {
 
 	// JSON Verisini Hazırla
 	emailReq := BrevoEmailRequest{
-		Sender:      BrevoUser{Name: "Kampüs Güvenlik", Email: "mobilprogramlama123@gmail.com"}, // Buraya kendi onaylı mailini yazarsan daha iyi olur
+		Sender:      BrevoUser{Name: "Kampüs Güvenlik", Email: "mobilprogramlama123@gmail.com"},
 		To:          []BrevoUser{{Email: toEmail}},
 		Subject:     "Şifre Sıfırlama İşlemi",
 		HtmlContent: htmlBody,

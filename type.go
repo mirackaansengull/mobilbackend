@@ -47,3 +47,10 @@ type LoginResponse struct {
 	ExpiresIn    string `json:"expiresIn"`
 	LocalId      string `json:"localId"` // User ID (UID)
 }
+
+type ProfileResponse struct {
+	FullName   string `json:"full_name"`
+	Email      string `json:"email"`
+	Department string `json:"department"`
+	Role       string `json:"role"`
+}
