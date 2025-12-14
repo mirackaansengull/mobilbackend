@@ -16,6 +16,7 @@ type User struct {
 	Department        string    `firestore:"department"`
 	Role              string    `firestore:"role"`
 	NotificationPrefs []string  `firestore:"notification_prefs"`
+	FollowedReports   []string  `firestore:"followed_reports"`
 	CreatedAt         time.Time `firestore:"created_at"`
 }
 
@@ -84,4 +85,9 @@ type Report struct {
 type GeoPoint struct {
 	Lat float64 `firestore:"lat"`
 	Lng float64 `firestore:"lng"`
+}
+
+type FollowRequest struct {
+	UserID   string `json:"user_id"`
+	ReportID string `json:"report_id"`
 }
