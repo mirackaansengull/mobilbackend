@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"cloud.google.com/go/firestore"
-	//"google.golang.org/grpc/codes"
-	//"google.golang.org/grpc/status"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func FollowReportHandler(w http.ResponseWriter, r *http.Request) {
@@ -60,4 +60,53 @@ func FollowReportHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Error(w, "Sadece POST ve DELETE metodları desteklenir", http.StatusMethodNotAllowed)
 	}
+}
+
+func GetFollowedReportsHandler(w http.ResponseWriter, r *http.Request) {
+	userID := r.URL.Query().Get("user_id")
+	if userID == "" {
+		http.Error(w, "user_id zorunlu", http.StatusBadRequest)
+		return
+	}
+
+	ctx := context.Background()
+
+	dsnap, err := FirestoreClient.Collection("users").Doc(userID).Get(ctx)
+	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			http.Error(w, "Kullanıcı bulunamadı", http.StatusNotFound)
+		} else {
+			http.Error(w, "Veritabanı hatası", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	var user User
+	if err := dsnap.DataTo(&user); err != nil {
+		http.Error(w, "Veri okuma hatası", http.StatusInternalServerError)
+		return
+	}
+
+	if len(user.FollowedReports) == 0 {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode([]Report{})
+		return
+	}
+
+	var followedReports []Report
+
+	for _, repID := range user.FollowedReports {
+		repSnap, err := FirestoreClient.Collection("reports").Doc(repID).Get(ctx)
+		if err != nil {
+			continue
+		}
+
+		var rep Report
+		if err := repSnap.DataTo(&rep); err == nil {
+			followedReports = append(followedReports, rep)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(followedReports)
 }

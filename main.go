@@ -52,6 +52,7 @@ func main() {
 	http.HandleFunc("POST /reports", CreateReportHandler)
 	http.HandleFunc("GET /get-reports", GetReportsHandler)
 	http.HandleFunc("POST /follow", FollowReportHandler)
+	http.HandleFunc("GET /get-follow", GetFollowedReportsHandler)
 
 	log.Println("Sunucu 8080 portunda çalışıyor...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
