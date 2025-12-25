@@ -91,3 +91,8 @@ type FollowRequest struct {
 	UserID   string `json:"user_id"`
 	ReportID string `json:"report_id"`
 }
+
+type UpdateReportStatusRequest struct {
+	ReportID string `json:"report_id"`
+	Status   string `json:"status"`
+}

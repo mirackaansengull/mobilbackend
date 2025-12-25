@@ -51,6 +51,7 @@ func main() {
 	http.HandleFunc("PUT /update-profile", UpdateUserProfileHandler)
 	http.HandleFunc("POST /reports", CreateReportHandler)
 	http.HandleFunc("GET /get-reports", GetReportsHandler)
+	http.HandleFunc("PUT /update-report-status", UpdateReportStatusHandler)
 	http.HandleFunc("POST /follow", FollowReportHandler)
 	http.HandleFunc("DELETE /follow", FollowReportHandler)
 	http.HandleFunc("GET /get-follow", GetFollowedReportsHandler)

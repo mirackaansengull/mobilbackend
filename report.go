@@ -9,6 +9,8 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func CreateReportHandler(w http.ResponseWriter, r *http.Request) {
@@ -104,4 +106,68 @@ func GetReportsHandler(w http.ResponseWriter, r *http.Request) {
 		reports = []Report{}
 	}
 	json.NewEncoder(w).Encode(reports)
+}
+
+func UpdateReportStatusHandler(w http.ResponseWriter, r *http.Request) {
+	var req UpdateReportStatusRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Geçersiz veri formatı", http.StatusBadRequest)
+		return
+	}
+
+	if req.ReportID == "" || req.Status == "" {
+		http.Error(w, "report_id ve status alanları zorunludur", http.StatusBadRequest)
+		return
+	}
+
+	// Geçerli durum kontrolü
+	validStatuses := map[string]bool{
+		"Açık":       true,
+		"İnceleniyor": true,
+		"Çözüldü":    true,
+	}
+
+	if !validStatuses[req.Status] {
+		http.Error(w, "Geçersiz durum. Geçerli durumlar: Açık, İnceleniyor, Çözüldü", http.StatusBadRequest)
+		return
+	}
+
+	ctx := context.Background()
+	reportRef := FirestoreClient.Collection("reports").Doc(req.ReportID)
+
+	// Bildirimin var olup olmadığını kontrol et
+	_, err := reportRef.Get(ctx)
+	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			http.Error(w, "Bildirim bulunamadı", http.StatusNotFound)
+		} else {
+			log.Printf("Bildirim kontrol hatası: %v", err)
+			http.Error(w, "Veritabanı hatası", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Durumu güncelle
+	_, err = reportRef.Update(ctx, []firestore.Update{
+		{
+			Path:  "status",
+			Value: req.Status,
+		},
+		{
+			Path:  "updated_at",
+			Value: time.Now(),
+		},
+	})
+
+	if err != nil {
+		log.Printf("Durum güncelleme hatası: %v", err)
+		http.Error(w, "Durum güncellenemedi", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Bildirim durumu başarıyla güncellendi",
+		"status":  req.Status,
+	})
 }
